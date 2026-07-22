@@ -46,6 +46,11 @@ class _WebviewScreenState extends ConsumerState<WebviewScreen> {
 
   Future<void> _load() async {
     try {
+      // Selalu pakai HTML/JS/CSS terbaru dari server — WebView cenderung menyimpan
+      // cache HTTP lebih lama daripada Chrome biasa, yang bisa membuat halaman admin
+      // "ketinggalan" versi setelah ada deploy baru.
+      await _controller.clearCache();
+
       final webviewToken = await ref.read(authRepositoryProvider).getWebviewToken();
       final uri = Uri.parse('${AppConfig.webBaseUrl}/webview-login').replace(queryParameters: {
         'token': webviewToken,
