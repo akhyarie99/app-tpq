@@ -69,18 +69,21 @@ class _WebviewScreenState extends ConsumerState<WebviewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(widget.title)),
-      body: Stack(
-        children: [
-          if (_error == null) WebViewWidget(controller: _controller),
-          if (_error != null) ErrorView(message: _error!, onRetry: () {
-            setState(() {
-              _error = null;
-              _loading = true;
-            });
-            _load();
-          }),
-          if (_loading && _error == null) const LoadingView(),
-        ],
+      body: SafeArea(
+        top: false,
+        child: Stack(
+          children: [
+            if (_error == null) WebViewWidget(controller: _controller),
+            if (_error != null) ErrorView(message: _error!, onRetry: () {
+              setState(() {
+                _error = null;
+                _loading = true;
+              });
+              _load();
+            }),
+            if (_loading && _error == null) const LoadingView(),
+          ],
+        ),
       ),
     );
   }
