@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 300" width="240" height="300">
+  <defs>
+    <linearGradient id="domeGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e3a8a"/>
+      <stop offset="100%" stop-color="#1e40af"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Arch frame -->
+  <path d="M40 205 V100 C40 40 75 5 120 0 C165 5 200 40 200 100 V205"
+        fill="none" stroke="#d9cfae" stroke-width="10" stroke-linecap="round"/>
+  <path d="M52 205 V102 C52 48 82 17 120 12 C158 17 188 48 188 102 V205"
+        fill="none" stroke="#1e3a8a" stroke-width="4" opacity="0.35"/>
+
+  <!-- Minarets -->
+  <g fill="#2547a8">
+    <rect x="55" y="100" width="14" height="70" rx="2"/>
+    <polygon points="62,76 70,100 54,100"/>
+    <rect x="59" y="68" width="6" height="12"/>
+    <rect x="171" y="100" width="14" height="70" rx="2"/>
+    <polygon points="178,76 186,100 170,100"/>
+    <rect x="175" y="68" width="6" height="12"/>
+  </g>
+
+  <!-- Dome body -->
+  <path d="M92 170 V130 C92 108 104 96 120 96 C136 96 148 108 148 130 V170 Z" fill="#1d4ed8"/>
+  <ellipse cx="120" cy="96" rx="28" ry="26" fill="url(#domeGrad)"/>
+  <path d="M120 58 C104 70 96 84 96 96 C96 108 106 116 120 116 C134 116 144 108 144 96 C144 84 136 70 120 58 Z" fill="url(#domeGrad)"/>
+
+  <!-- Crescent + star -->
+  <path d="M120 28 a10 10 0 1 0 0.5 0 a7.5 7.5 0 1 1 -0.5 0" fill="#1e3a8a"/>
+  <polygon points="133,24 135,29 140,29 136,32 137,37 133,34 129,37 130,32 126,29 131,29" fill="#1e3a8a"/>
+
+  <!-- Book / Quran on stand -->
+  <g>
+    <polygon points="98,176 120,186 142,176 142,186 120,196 98,186" fill="#8a5a2b"/>
+    <path d="M120 156 L98 164 V186 L120 178 Z" fill="#f8fafc" stroke="#1e3a8a" stroke-width="2"/>
+    <path d="M120 156 L142 164 V186 L120 178 Z" fill="#f8fafc" stroke="#1e3a8a" stroke-width="2"/>
+    <line x1="120" y1="158" x2="120" y2="178" stroke="#1e3a8a" stroke-width="2"/>
+  </g>
+
+  <!-- Base shadow -->
+  <ellipse cx="120" cy="202" rx="90" ry="7" fill="#1e3a8a" opacity="0.12"/>
+
+  <!-- Wordmark -->
+  <text x="120" y="270" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="64"
+        text-anchor="middle" fill="#1e3a8a">TPQ</text>
+</svg>

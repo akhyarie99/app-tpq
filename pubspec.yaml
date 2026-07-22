@@ -1,0 +1,50 @@
+name: simasjid_app
+description: "SiMasjid - Aplikasi Ustadz/Ustadzah TPQ"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # WebView (hybrid: layar native + halaman web SiMasjid via WebView)
+  webview_flutter: ^4.7.0
+
+  # HTTP & API
+  dio: ^5.4.3
+
+  # State management (Riverpod tanpa code-gen agar build tetap ringan/stabil)
+  flutter_riverpod: ^2.5.1
+
+  # Local storage
+  flutter_secure_storage: ^9.0.0
+  shared_preferences: ^2.2.3
+
+  # Geolocation (validasi presensi harus di area masjid)
+  geolocator: ^11.0.0
+  permission_handler: ^11.3.1
+
+  # UI
+  cached_network_image: ^3.3.1
+  shimmer: ^3.0.0
+  flutter_svg: ^2.0.10
+
+  # Utils
+  intl: ^0.19.0
+  connectivity_plus: ^6.0.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/logo.svg
