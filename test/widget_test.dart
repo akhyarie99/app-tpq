@@ -15,6 +15,6 @@ void main() {
     expect(find.text('Portal Ustadz/Ustadzah TPQ'), findsOneWidget);
     expect(find.widgetWithText(TextFormField, 'Nomor HP'), findsOneWidget);
     expect(find.widgetWithText(TextFormField, 'Kata Sandi'), findsOneWidget);
-    expect(find.widgetWithText(ElevatedButton, 'Masuk'), findsOneWidget);
+    expect(find.text('Masuk'), findsOneWidget);
   });
 }

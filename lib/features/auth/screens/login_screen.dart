@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_colors.dart';
+import '../../../shared/theme/app_theme.dart';
 import '../providers/auth_provider.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -38,76 +39,123 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final authState = ref.watch(authProvider);
     final isLoading = authState.status == AuthStatus.authenticating;
 
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Image.asset(
-                    'assets/images/logo.png',
-                    height: 140,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Portal Ustadz/Ustadzah TPQ',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.slate500),
-                  ),
-                  const SizedBox(height: 32),
-                  if (authState.errorMessage != null) ...[
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.danger.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
+    // Login selalu tema terang & latar putih, senada dengan latar logo — terlepas
+    // dari mode gelap/terang sistem HP (yang tetap berlaku di layar-layar lain).
+    return Theme(
+      data: AppTheme.light,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Image.asset(
+                      'assets/images/logo.png',
+                      height: 140,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Portal Ustadz/Ustadzah TPQ',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.slate500),
+                    ),
+                    const SizedBox(height: 32),
+                    if (authState.errorMessage != null) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.danger.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          authState.errorMessage!,
+                          style: const TextStyle(color: AppColors.danger),
+                        ),
                       ),
-                      child: Text(
-                        authState.errorMessage!,
-                        style: const TextStyle(color: AppColors.danger),
-                      ),
+                      const SizedBox(height: 16),
+                    ],
+                    TextFormField(
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      decoration: const InputDecoration(labelText: 'Nomor HP', prefixIcon: Icon(Icons.phone_outlined)),
+                      validator: (value) => (value == null || value.trim().isEmpty) ? 'Nomor HP wajib diisi' : null,
                     ),
                     const SizedBox(height: 16),
-                  ],
-                  TextFormField(
-                    controller: _phoneController,
-                    keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(labelText: 'Nomor HP', prefixIcon: Icon(Icons.phone_outlined)),
-                    validator: (value) => (value == null || value.trim().isEmpty) ? 'Nomor HP wajib diisi' : null,
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    decoration: InputDecoration(
-                      labelText: 'Kata Sandi',
-                      prefixIcon: const Icon(Icons.lock_outline_rounded),
-                      suffixIcon: IconButton(
-                        icon: Icon(_obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined),
-                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                    TextFormField(
+                      controller: _passwordController,
+                      obscureText: _obscurePassword,
+                      decoration: InputDecoration(
+                        labelText: 'Kata Sandi',
+                        prefixIcon: const Icon(Icons.lock_outline_rounded),
+                        suffixIcon: IconButton(
+                          icon: Icon(_obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                        ),
                       ),
+                      validator: (value) => (value == null || value.isEmpty) ? 'Kata sandi wajib diisi' : null,
+                      onFieldSubmitted: (_) => _submit(),
                     ),
-                    validator: (value) => (value == null || value.isEmpty) ? 'Kata sandi wajib diisi' : null,
-                    onFieldSubmitted: (_) => _submit(),
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: isLoading ? null : _submit,
-                    child: isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                          )
-                        : const Text('Masuk'),
-                  ),
-                ],
+                    const SizedBox(height: 24),
+                    _GradientButton(
+                      onPressed: isLoading ? null : _submit,
+                      loading: isLoading,
+                      label: 'Masuk',
+                    ),
+                  ],
+                ),
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GradientButton extends StatelessWidget {
+  const _GradientButton({required this.onPressed, required this.loading, required this.label});
+
+  final VoidCallback? onPressed;
+  final bool loading;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final disabled = onPressed == null;
+
+    return Container(
+      height: 48,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        gradient: LinearGradient(
+          colors: disabled
+              ? [AppColors.slate400, AppColors.slate400]
+              : const [Color(0xFF1E3A8A), Color(0xFF60A5FA)],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: onPressed,
+          child: Center(
+            child: loading
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  )
+                : Text(
+                    label,
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 15),
+                  ),
           ),
         ),
       ),
