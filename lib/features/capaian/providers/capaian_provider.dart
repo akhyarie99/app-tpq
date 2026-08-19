@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../presensi/data/models/santri_model.dart';
 import '../data/capaian_repository.dart';
+import '../data/models/daily_progress_model.dart';
 import '../data/models/grade_model.dart';
 import '../data/models/hafalan_model.dart';
 
@@ -19,4 +20,8 @@ final capaianDetailProvider =
 
 final hafalanProvider = FutureProvider.autoDispose.family<List<HafalanModel>, String>((ref, studentId) {
   return ref.read(capaianRepositoryProvider).hafalan(studentId);
+});
+
+final dailyProgressProvider = FutureProvider.autoDispose.family<List<DailyProgressModel>, String>((ref, studentId) {
+  return ref.read(capaianRepositoryProvider).dailyProgress(studentId);
 });

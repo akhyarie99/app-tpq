@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../shared/widgets/error_view.dart';
 import '../../../shared/widgets/loading_view.dart';
+import '../data/models/daily_progress_model.dart';
 import '../data/models/grade_model.dart';
 import '../data/models/hafalan_model.dart';
 import '../providers/capaian_provider.dart';
 import 'input_hafalan_dialog.dart';
+import 'input_harian_dialog.dart';
 import 'input_nilai_dialog.dart';
 
 class CapaianDetailScreen extends ConsumerStatefulWidget {
@@ -22,7 +25,7 @@ class CapaianDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _CapaianDetailScreenState extends ConsumerState<CapaianDetailScreen> with SingleTickerProviderStateMixin {
-  late final _tabController = TabController(length: 2, vsync: this);
+  late final _tabController = TabController(length: 3, vsync: this);
 
   @override
   void dispose() {
@@ -59,6 +62,23 @@ class _CapaianDetailScreenState extends ConsumerState<CapaianDetailScreen> with 
     }
   }
 
+  Future<void> _openInputHarian() async {
+    final saved = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => InputHarianDialog(classId: widget.classId, studentId: widget.studentId),
+    );
+
+    if (saved == true) {
+      ref.invalidate(dailyProgressProvider(widget.studentId));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Tersimpan — wali murid sudah diberi tahu.')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final detailAsync = ref.watch(capaianDetailProvider(widget.studentId));
@@ -68,12 +88,23 @@ class _CapaianDetailScreenState extends ConsumerState<CapaianDetailScreen> with 
         title: Text(widget.studentName),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [Tab(text: 'Nilai'), Tab(text: 'Hafalan')],
+          tabs: const [Tab(text: 'Harian'), Tab(text: 'Nilai'), Tab(text: 'Hafalan')],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
         children: [
+          Consumer(builder: (context, ref, _) {
+            final dailyAsync = ref.watch(dailyProgressProvider(widget.studentId));
+            return dailyAsync.when(
+              loading: () => const LoadingView(),
+              error: (error, _) => ErrorView(
+                message: error.toString(),
+                onRetry: () => ref.invalidate(dailyProgressProvider(widget.studentId)),
+              ),
+              data: (items) => _HarianTab(items: items, onAdd: _openInputHarian),
+            );
+          }),
           detailAsync.when(
             loading: () => const LoadingView(),
             error: (error, _) => ErrorView(
@@ -219,6 +250,66 @@ class _HafalanTab extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _HarianTab extends StatelessWidget {
+  const _HarianTab({required this.items, required this.onAdd});
+
+  final List<DailyProgressModel> items;
+  final VoidCallback onAdd;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Expanded(
+          child: items.isEmpty
+              ? const Center(child: Text('Belum ada catatan mengaji harian.'))
+              : ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: items.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
+                  itemBuilder: (context, index) {
+                    final item = items[index];
+                    return Card(
+                      child: ListTile(
+                        title: Text(item.summary),
+                        subtitle: Text(DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(DateTime.parse(item.date))),
+                        trailing: _KeteranganBadge(keterangan: item.keterangan),
+                      ),
+                    );
+                  },
+                ),
+        ),
+        SafeArea(
+          minimum: const EdgeInsets.all(16),
+          child: OutlinedButton.icon(
+            onPressed: onAdd,
+            icon: const Icon(Icons.add_rounded),
+            label: const Text('Input Mengaji Hari Ini'),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _KeteranganBadge extends StatelessWidget {
+  const _KeteranganBadge({required this.keterangan});
+
+  final String keterangan;
+
+  @override
+  Widget build(BuildContext context) {
+    final isLancar = keterangan == 'lancar';
+    final color = isLancar ? AppColors.primary600 : AppColors.gold600;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(8)),
+      child: Text(isLancar ? 'Lancar' : 'Ulang', style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w600)),
     );
   }
 }
