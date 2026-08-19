@@ -6,6 +6,7 @@ import '../../presensi/data/models/santri_model.dart';
 import 'models/daily_progress_model.dart';
 import 'models/grade_model.dart';
 import 'models/hafalan_model.dart';
+import 'models/santri_lookup_model.dart';
 
 class CapaianRepository {
   CapaianRepository({Dio? dio}) : _dio = dio ?? DioClient.instance.dio;
@@ -18,6 +19,26 @@ class CapaianRepository {
       return (response.data['students'] as List)
           .map((e) => SantriModel.fromJson(e as Map<String, dynamic>))
           .toList();
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  Future<List<SantriLookupModel>> searchStudents(String query) async {
+    try {
+      final response = await _dio.get('/capaian/cari', queryParameters: {'q': query});
+      return (response.data['students'] as List)
+          .map((e) => SantriLookupModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  Future<SantriLookupModel> findStudent(String studentId) async {
+    try {
+      final response = await _dio.get('/capaian/santri/$studentId/temukan');
+      return SantriLookupModel.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }
