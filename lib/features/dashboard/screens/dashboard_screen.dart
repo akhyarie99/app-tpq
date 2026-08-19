@@ -8,6 +8,7 @@ import '../../../shared/widgets/section_header.dart';
 import '../../../shared/widgets/stat_card.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../capaian/screens/capaian_kelas_screen.dart';
+import '../../kehadiran_staf/screens/staff_attendance_home_screen.dart';
 import '../../presensi/screens/presensi_input_screen.dart';
 import '../../presensi/screens/presensi_kelas_screen.dart';
 import '../../webview/screens/webview_screen.dart';
@@ -102,6 +103,13 @@ class DashboardScreen extends ConsumerWidget {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 8),
+              _QuickAction(
+                icon: Icons.face_retouching_natural_rounded,
+                label: 'Presensi Saya (Masuk/Keluar Mengajar)',
+                fullWidth: true,
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StaffAttendanceHomeScreen())),
               ),
               const SizedBox(height: 8),
               _QuickAction(

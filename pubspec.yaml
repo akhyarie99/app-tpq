@@ -37,6 +37,14 @@ dependencies:
   # Scan QR di kartu/buku mutabaah santri (fitur input mengaji harian)
   mobile_scanner: ^6.0.7
 
+  # Presensi ustadz: wajah (deteksi + embedding on-device) + anti-fake-GPS
+  camera: ^0.12.0+2
+  google_mlkit_face_detection: ^0.14.0
+  tflite_flutter: ^0.12.1
+  image: ^4.8.0
+  safe_device: ^1.4.1
+  device_info_plus: ^12.4.0
+
   # Utils
   intl: ^0.19.0
   connectivity_plus: ^6.0.3
@@ -51,6 +59,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/logo.png
+    - assets/models/
 
 flutter_launcher_icons:
   android: true
