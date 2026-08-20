@@ -23,6 +23,49 @@ flutter run --dart-define=API_BASE_URL=http://192.168.1.x:8000/api/mobile/v1 \
 Login pakai akun yang sudah punya role `ustadz`, `admin`, atau `super_admin` di backend
 (role lain ditolak oleh `/api/mobile/v1/login`, lihat `MobileAuthController::login`).
 
+## Multi-Tenant (Flavor)
+
+Backend web SiMasjid sudah multi-tenant SaaS — tiap lembaga dapat subdomain/domain
+sendiri. App ini mengikutinya: satu codebase, di-build ulang per lembaga jadi APK
+terpisah dengan nama app, ikon, dan splash screen sendiri-sendiri, tiap flavor arah
+ke subdomain lembaganya masing-masing. Pola ini diadaptasi dari `E:\project\hrm\hrm_mobile`
+— bedanya, tiap flavor di sini bawa `apiBaseUrl`/`webBaseUrl` sendiri (lihat
+`lib/config/flavor_config.dart`) karena tiap lembaga memang backend/subdomain terpisah,
+bukan satu API multi-tenant dibedakan id seperti di HRM.
+
+### Menjalankan flavor yang sudah ada
+
+```bash
+flutter run --flavor tpqalazharcilacap -t lib/main_tpqalazharcilacap.dart
+flutter build apk --flavor tpqalazharcilacap -t lib/main_tpqalazharcilacap.dart --release
+```
+
+`flutter run`/`flutter build` tanpa `--flavor` (lewat `lib/main.dart`) tetap jalan untuk
+dev cepat — fallback ke config `tpqalazharcilacap`.
+
+### Menambah lembaga baru
+
+Pakai script otomatis (generate config Dart, entry point, ikon, splash, dan daftarkan
+flavor di Gradle sekaligus):
+
+```bash
+dart run tool/add_tenant.dart <flavor_id> <path/logo.png> "<Nama App>" <api_base_url> <web_base_url>
+
+# Contoh:
+dart run tool/add_tenant.dart tpqnurulhuda assets/tmp/logo.png "TPQ Nurul Huda" \
+  https://tpqnurulhuda.tpq.smartedugame.com/api/mobile/v1 \
+  https://tpqnurulhuda.tpq.smartedugame.com
+```
+
+Catatan:
+- `flavor_id` harus huruf kecil + angka/underscore, diawali huruf, dan **tidak boleh
+  diawali "test"** (direservasi Android Gradle Plugin untuk test variant — build akan
+  gagal kalau dilanggar).
+- Setelah script selesai, cek hasilnya: `flutter run --flavor <flavor_id> -t lib/main_<flavor_id>.dart`.
+- Sisa langkah manual: siapkan signing config rilis sendiri sebelum publish ke Play Store
+  (semua flavor saat ini masih pakai debug signing, lihat bagian "Yang sengaja belum
+  dipasang" di bawah).
+
 ## Yang sudah dibangun
 
 - Auth: login nomor HP, token Sanctum tersimpan di `flutter_secure_storage`, auto-logout saat 401.

@@ -37,6 +37,18 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+
+    // Satu codebase, di-build ulang per lembaga (flavor) dengan applicationId,
+    // nama app, ikon, dan splash berbeda — lihat lib/config/flavor_config.dart
+    // dan README bagian "Multi-Tenant (Flavor)".
+    flavorDimensions += "tenant"
+    productFlavors {
+        create("tpqalazharcilacap") {
+            dimension = "tenant"
+            applicationId = "com.simasjid.simasjid_app.tpqalazharcilacap"
+            resValue("string", "app_name", "TPQ Al-Azhar Cilacap")
+        }
+    }
 }
 
 flutter {

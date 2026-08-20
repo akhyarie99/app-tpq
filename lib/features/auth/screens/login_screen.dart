@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../config/flavor_config.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../providers/auth_provider.dart';
@@ -55,12 +56,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Image.asset(
-                      'assets/images/logo.png',
+                      FlavorConfig.instance.logoAssetPath,
                       height: 140,
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      'Portal Ustadz/Ustadzah TPQ',
+                      FlavorConfig.instance.appName,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.slate500),
                     ),
