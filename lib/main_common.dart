@@ -30,8 +30,7 @@ class SiMasjidApp extends StatelessWidget {
       title: FlavorConfig.instance.appName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.light,
       locale: const Locale('id', 'ID'),
       home: const _AuthGate(),
     );

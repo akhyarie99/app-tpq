@@ -11,34 +11,18 @@ class AppTheme {
     end: Alignment.bottomRight,
   );
 
-  static ThemeData get light => _base(
-        brightness: Brightness.light,
-        background: AppColors.slate50,
-        surface: Colors.white,
-        onSurface: AppColors.slate900,
-        muted: AppColors.slate500,
-        border: AppColors.slate200,
-      );
+  // Selalu terang (lihat SiMasjidApp.themeMode) — tampilan elegan/profesional
+  // yang diinginkan bergantung pada latar terang; sebelumnya app juga
+  // mengikuti dark mode sistem HP, yang membuat teks di atas kartu/tile
+  // berlatar terang (mis. Menu Cepat, ringkasan kelas) jadi tak terbaca
+  // karena warna teks default ikut berubah jadi terang juga.
+  static ThemeData get light {
+    const surface = Colors.white;
+    const onSurface = AppColors.slate900;
+    const border = AppColors.slate200;
 
-  static ThemeData get dark => _base(
-        brightness: Brightness.dark,
-        background: AppColors.darkBg,
-        surface: AppColors.darkSurface,
-        onSurface: AppColors.slate100,
-        muted: AppColors.slate400,
-        border: AppColors.darkBorder,
-      );
-
-  static ThemeData _base({
-    required Brightness brightness,
-    required Color background,
-    required Color surface,
-    required Color onSurface,
-    required Color muted,
-    required Color border,
-  }) {
     final colorScheme = ColorScheme(
-      brightness: brightness,
+      brightness: Brightness.light,
       primary: AppColors.primary600,
       onPrimary: Colors.white,
       secondary: AppColors.gold500,
@@ -51,10 +35,10 @@ class AppTheme {
 
     return ThemeData(
       useMaterial3: true,
-      brightness: brightness,
+      brightness: Brightness.light,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: background,
-      appBarTheme: AppBarTheme(
+      scaffoldBackgroundColor: AppColors.slate50,
+      appBarTheme: const AppBarTheme(
         backgroundColor: surface,
         foregroundColor: onSurface,
         elevation: 0,
@@ -66,7 +50,7 @@ class AppTheme {
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: border),
+          side: const BorderSide(color: border),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -74,11 +58,11 @@ class AppTheme {
         fillColor: surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: border),
+          borderSide: const BorderSide(color: border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: border),
+          borderSide: const BorderSide(color: border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -94,13 +78,13 @@ class AppTheme {
           textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
         ),
       ),
-      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: surface,
         selectedItemColor: AppColors.primary600,
-        unselectedItemColor: muted,
+        unselectedItemColor: AppColors.slate500,
         type: BottomNavigationBarType.fixed,
       ),
-      textTheme: ThemeData(brightness: brightness).textTheme.apply(
+      textTheme: ThemeData(brightness: Brightness.light).textTheme.apply(
             bodyColor: onSurface,
             displayColor: onSurface,
           ),

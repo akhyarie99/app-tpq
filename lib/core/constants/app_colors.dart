@@ -20,11 +20,6 @@ class AppColors {
   static const Color gold500 = Color(0xFFF59E0B);
   static const Color gold600 = Color(0xFFD97706);
 
-  static const Color darkBg = Color(0xFF0F172A);
-  static const Color darkSurface = Color(0xFF1E293B);
-  static const Color darkBorder = Color(0xFF334155);
-  static const Color darkMuted = Color(0xFF475569);
-
   static const Color slate50 = Color(0xFFF8FAFC);
   static const Color slate100 = Color(0xFFF1F5F9);
   static const Color slate200 = Color(0xFFE2E8F0);
