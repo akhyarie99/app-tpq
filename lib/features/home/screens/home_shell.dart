@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_colors.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/screens/beranda_tab.dart';
 import '../../kehadiran_staf/screens/kehadiran_tab.dart';
 import '../../profile/screens/profil_tab.dart';
@@ -9,17 +11,49 @@ import '../../profile/screens/profil_tab.dart';
 /// Kehadiran, Profil). "Menu Lainnya" (web admin lengkap) sengaja TIDAK jadi
 /// tab di sini — dibuka lewat Navigator.push dari dalam tab supaya bottom
 /// nav bar ini tidak ikut tampil dobel di atas sidebar/menu web-nya sendiri.
-class HomeShell extends StatefulWidget {
+class HomeShell extends ConsumerStatefulWidget {
   const HomeShell({super.key});
 
   @override
-  State<HomeShell> createState() => _HomeShellState();
+  ConsumerState<HomeShell> createState() => _HomeShellState();
 }
 
-class _HomeShellState extends State<HomeShell> {
+class _HomeShellState extends ConsumerState<HomeShell> {
   int _index = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeOfferBiometric());
+  }
+
   void _navigateTab(int index) => setState(() => _index = index);
+
+  Future<void> _maybeOfferBiometric() async {
+    final auth = ref.read(authProvider.notifier);
+    if (!auth.consumeJustLoggedIn()) return;
+    if (!ref.read(authProvider).biometricAvailable) return;
+    if (await auth.isBiometricEnabled()) return;
+    if (!mounted) return;
+
+    final enable = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Aktifkan Login Biometrik?'),
+        content: const Text(
+          'Buka aplikasi berikutnya cukup dengan sidik jari/wajah, tanpa perlu ketik kata sandi lagi.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Nanti Saja')),
+          FilledButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: const Text('Aktifkan')),
+        ],
+      ),
+    );
+
+    if (enable == true) {
+      await auth.setBiometricEnabled(true);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

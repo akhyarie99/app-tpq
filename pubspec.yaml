@@ -26,6 +26,9 @@ dependencies:
   flutter_secure_storage: ^9.0.0
   shared_preferences: ^2.2.3
 
+  # Login biometrik (buka sesi tersimpan dengan sidik jari/wajah)
+  local_auth: ^2.3.0
+
   # Geolocation (validasi presensi harus di area masjid)
   geolocator: ^11.0.0
   permission_handler: ^11.3.1

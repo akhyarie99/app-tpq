@@ -47,7 +47,7 @@ class _AuthGate extends ConsumerWidget {
     return switch (authState.status) {
       AuthStatus.bootstrapping => const _SplashScreen(),
       AuthStatus.authenticated => const HomeShell(),
-      AuthStatus.unauthenticated || AuthStatus.authenticating => const LoginScreen(),
+      AuthStatus.unauthenticated || AuthStatus.authenticating || AuthStatus.locked => const LoginScreen(),
     };
   }
 }

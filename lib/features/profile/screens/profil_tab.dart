@@ -9,15 +9,62 @@ import '../../kehadiran_staf/screens/face_enroll_screen.dart';
 import '../../webview/screens/webview_screen.dart';
 
 /// Tab "Profil" di [HomeShell] — identitas pengguna & pintasan akun.
-class ProfilTab extends ConsumerWidget {
+class ProfilTab extends ConsumerStatefulWidget {
   const ProfilTab({super.key});
 
-  Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
+  @override
+  ConsumerState<ProfilTab> createState() => _ProfilTabState();
+}
+
+class _ProfilTabState extends ConsumerState<ProfilTab> {
+  bool? _biometricEnabled;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBiometricPreference();
+  }
+
+  Future<void> _loadBiometricPreference() async {
+    final enabled = await ref.read(authProvider.notifier).isBiometricEnabled();
+    if (mounted) setState(() => _biometricEnabled = enabled);
+  }
+
+  Future<void> _toggleBiometric(bool value) async {
+    final auth = ref.read(authProvider.notifier);
+
+    if (value) {
+      // Minta verifikasi biometrik dulu sebelum mengaktifkan, supaya user
+      // tidak "mengunci diri sendiri" pakai sidik jari yang ternyata gagal
+      // dibaca sensor.
+      try {
+        final confirmed = await ref.read(biometricServiceProvider).authenticate(
+              reason: 'Verifikasi biometrik untuk mengaktifkan fitur ini',
+            );
+        if (!confirmed) return;
+      } catch (e) {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+        return;
+      }
+    }
+
+    await auth.setBiometricEnabled(value);
+    if (mounted) setState(() => _biometricEnabled = value);
+  }
+
+  Future<void> _confirmLogout(BuildContext context) async {
+    // Kalau biometrik aktif, "Keluar" cuma mengunci app (token tetap
+    // tersimpan) — jelaskan ini di dialog supaya tidak mengejutkan user yang
+    // mengira ini logout penuh (lihat AuthNotifier.logout).
+    final content = _biometricEnabled == true
+        ? 'Aplikasi akan terkunci. Anda bisa masuk lagi dengan sidik jari/wajah tanpa ketik password.'
+        : 'Anda yakin ingin keluar dari akun ini?';
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Keluar'),
-        content: const Text('Anda yakin ingin keluar dari akun ini?'),
+        content: Text(content),
         actions: [
           TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('Batal')),
           FilledButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: const Text('Keluar')),
@@ -40,8 +87,9 @@ class ProfilTab extends ConsumerWidget {
   };
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(authProvider).user;
+  Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+    final user = authState.user;
     final initials = (user?.name ?? '-').trim().isEmpty
         ? '-'
         : user!.name.trim().split(RegExp(r'\s+')).map((e) => e[0]).take(2).join().toUpperCase();
@@ -115,6 +163,20 @@ class ProfilTab extends ConsumerWidget {
               ),
             ),
           ),
+          if (authState.biometricAvailable) ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Text('Keamanan', style: Theme.of(context).textTheme.titleMedium),
+            ),
+            SwitchListTile(
+              secondary: const Icon(Icons.fingerprint, color: AppColors.primary600),
+              title: const Text('Login Biometrik', style: TextStyle(fontWeight: FontWeight.w600)),
+              subtitle: const Text('Buka aplikasi dengan sidik jari/wajah', style: TextStyle(fontSize: 12)),
+              value: _biometricEnabled ?? false,
+              onChanged: _biometricEnabled == null ? null : _toggleBiometric,
+              activeTrackColor: AppColors.primary600,
+            ),
+          ],
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             child: Text('Menu', style: Theme.of(context).textTheme.titleMedium),
@@ -153,7 +215,7 @@ class ProfilTab extends ConsumerWidget {
             title: 'Keluar',
             subtitle: 'Keluar dari akun ini',
             iconColor: AppColors.danger,
-            onTap: () => _confirmLogout(context, ref),
+            onTap: () => _confirmLogout(context),
           ),
           const SizedBox(height: 24),
         ],

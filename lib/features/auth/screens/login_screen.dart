@@ -18,6 +18,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _biometricSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Tawarkan prompt biometrik begitu layar muncul kalau memang ada sesi
+    // terkunci yang menunggu — hanya sekali, jadi aman di initState (bukan
+    // build) walau LoginScreen tetap ditampilkan lagi setelah gagal/batal.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (ref.read(authProvider).status == AuthStatus.locked) {
+        _unlockWithBiometric();
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -35,10 +50,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         );
   }
 
+  Future<void> _unlockWithBiometric() async {
+    if (_biometricSubmitting) return;
+    setState(() => _biometricSubmitting = true);
+
+    final success = await ref.read(authProvider.notifier).unlockWithBiometric();
+    if (!mounted) return;
+    setState(() => _biometricSubmitting = false);
+
+    if (!success) {
+      final error = ref.read(authProvider).errorMessage;
+      if (error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final isLoading = authState.status == AuthStatus.authenticating;
+    // "locked" = ada sesi tersimpan + biometrik diaktifkan — tawarkan
+    // pintasan sidik jari/wajah di bawah tombol Masuk, tanpa menyembunyikan
+    // form nomor HP/password (tetap bisa dipakai kalau sensor gagal/malas).
+    final showBiometricShortcut = authState.status == AuthStatus.locked;
 
     // Login selalu tema terang & latar putih, senada dengan latar logo — terlepas
     // dari mode gelap/terang sistem HP (yang tetap berlaku di layar-layar lain).
@@ -107,6 +142,49 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       loading: isLoading,
                       label: 'Masuk',
                     ),
+                    if (showBiometricShortcut) ...[
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(child: Divider(color: Colors.grey.shade300)),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: Text('atau', style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                          ),
+                          Expanded(child: Divider(color: Colors.grey.shade300)),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Center(
+                        child: Column(
+                          children: [
+                            InkWell(
+                              borderRadius: BorderRadius.circular(40),
+                              onTap: _biometricSubmitting ? null : _unlockWithBiometric,
+                              child: Container(
+                                width: 64,
+                                height: 64,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: AppColors.primary600.withValues(alpha: 0.1),
+                                ),
+                                child: _biometricSubmitting
+                                    ? const Padding(
+                                        padding: EdgeInsets.all(20),
+                                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary600),
+                                      )
+                                    : const Icon(Icons.fingerprint, size: 36, color: AppColors.primary600),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            const Text(
+                              'Masuk dengan Biometrik',
+                              style: TextStyle(color: AppColors.primary600, fontSize: 12, fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
