@@ -5,7 +5,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'config/flavor_config.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/auth/screens/login_screen.dart';
-import 'features/dashboard/screens/dashboard_screen.dart';
+import 'features/home/screens/home_shell.dart';
 import 'shared/theme/app_theme.dart';
 
 /// Dipanggil dari tiap main_{flavor}.dart setelah men-set FlavorConfig.instance.
@@ -47,7 +47,7 @@ class _AuthGate extends ConsumerWidget {
 
     return switch (authState.status) {
       AuthStatus.bootstrapping => const _SplashScreen(),
-      AuthStatus.authenticated => const DashboardScreen(),
+      AuthStatus.authenticated => const HomeShell(),
       AuthStatus.unauthenticated || AuthStatus.authenticating => const LoginScreen(),
     };
   }

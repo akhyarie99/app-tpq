@@ -5,6 +5,12 @@ import '../../core/constants/app_colors.dart';
 class AppTheme {
   AppTheme._();
 
+  static const brandGradient = LinearGradient(
+    colors: [AppColors.primary700, AppColors.primary500],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
   static ThemeData get light => _base(
         brightness: Brightness.light,
         background: AppColors.slate50,

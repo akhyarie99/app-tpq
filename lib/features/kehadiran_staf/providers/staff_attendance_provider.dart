@@ -9,6 +9,10 @@ final staffAttendanceTodayProvider = FutureProvider.autoDispose<StaffAttendanceT
   return ref.read(staffAttendanceRepositoryProvider).today();
 });
 
+final staffAttendanceHistoryProvider = FutureProvider.autoDispose<List<StaffAttendanceToday>>((ref) {
+  return ref.read(staffAttendanceRepositoryProvider).history();
+});
+
 final faceEnrollStatusProvider = FutureProvider.autoDispose<bool>((ref) {
   return ref.read(staffAttendanceRepositoryProvider).faceEnrollStatus();
 });
