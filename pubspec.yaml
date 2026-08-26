@@ -15,6 +15,9 @@ dependencies:
 
   # WebView (hybrid: layar native + halaman web SiMasjid via WebView)
   webview_flutter: ^4.7.0
+  # Diimpor langsung untuk AndroidWebViewController.setOnShowFileSelector
+  # (jembatan <input type="file"> di halaman web ke picker native).
+  webview_flutter_android: ^4.0.0
 
   # HTTP & API
   dio: ^5.4.3
@@ -28,6 +31,11 @@ dependencies:
 
   # Login biometrik (buka sesi tersimpan dengan sidik jari/wajah)
   local_auth: ^2.3.0
+
+  # Pilih foto dari galeri/kamera — dipakai WebView untuk menjembatani
+  # <input type="file"> di halaman web (mis. upload foto profil) ke picker
+  # native Android, karena WebView tidak bisa membuka file picker sendiri.
+  image_picker: ^1.1.2
 
   # Geolocation (validasi presensi harus di area masjid)
   geolocator: ^11.0.0

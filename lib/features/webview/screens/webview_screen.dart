@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_android/webview_flutter_android.dart';
 
 import '../../../core/constants/app_config.dart';
 import '../../../shared/widgets/error_view.dart';
@@ -41,7 +43,58 @@ class _WebviewScreenState extends ConsumerState<WebviewScreen> {
           }),
         ),
       );
+
+    // WebView Android tidak bisa membuka file picker sendiri untuk
+    // <input type="file"> (mis. upload foto profil/logo) — tanpa ini tombol
+    // upload di halaman web terlihat seperti tidak berbuat apa-apa sama
+    // sekali (bukan soal izin runtime, callback-nya memang belum ada).
+    final platform = _controller.platform;
+    if (platform is AndroidWebViewController) {
+      platform.setOnShowFileSelector(_onShowFileSelector);
+    }
+
     _load();
+  }
+
+  Future<List<String>> _onShowFileSelector(FileSelectorParams params) async {
+    final source = await _pickImageSource();
+    if (source == null) return [];
+
+    final ImagePicker picker = ImagePicker();
+    XFile? file;
+    try {
+      file = await picker.pickImage(source: source, imageQuality: 85, maxWidth: 1600, maxHeight: 1600);
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      return [];
+    }
+    if (file == null) return [];
+
+    return [Uri.file(file.path).toString()];
+  }
+
+  Future<ImageSource?> _pickImageSource() {
+    return showModalBottomSheet<ImageSource>(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt_outlined),
+              title: const Text('Ambil Foto'),
+              onTap: () => Navigator.of(sheetContext).pop(ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: const Text('Pilih dari Galeri'),
+              onTap: () => Navigator.of(sheetContext).pop(ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _load() async {
